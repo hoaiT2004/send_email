@@ -1,0 +1,60 @@
+import java.util.Properties;
+import javax.mail.*;
+import javax.mail.internet.*;
+
+public class SendEmail {
+   public static void main(String[] args) {
+      // Email của người gửi
+      String from = "youremail@gmail.com";
+      // Mật khẩu email của người gửi
+      String password = "yourpassword";
+      // Email của người nhận
+      String to = "recipientemail@gmail.com";
+      // Mã captcha
+      String captcha = "yourcaptcha";
+      // Thời hạn của mã captcha (5 phút)
+      int expirationTime = 5 * 60 * 1000;
+
+      // Cài đặt thông tin host và port cho SMTP server
+      Properties props = new Properties();
+      props.put("mail.smtp.host", "smtp.gmail.com");
+      props.put("mail.smtp.port", "587");
+      props.put("mail.smtp.auth", "true");
+      props.put("mail.smtp.starttls.enable", "true");
+
+      // Tạo đối tượng Session để xác thực người gửi
+      Session session = Session.getInstance(props,
+         new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+               return new PasswordAuthentication(from, password);
+            }
+         });
+
+      try {
+         // Tạo đối tượng MimeMessage để tạo email
+         Message message = new MimeMessage(session);
+         // Thiết lập email người nhận
+         message.setRecipients(Message.RecipientType.TO,
+            InternetAddress.parse(to));
+         // Thiết lập tiêu đề email
+         message.setSubject("Mã captcha");
+         // Thiết lập nội dung email
+         message.setText("Mã captcha của bạn là: " + captcha);
+
+         // Gửi email
+         Transport.send(message);
+
+         System.out.println("Đã gửi email thành công!");
+
+         // Chờ 5 phút trước khi mã captcha hết hiệu lực
+         Thread.sleep(expirationTime);
+
+         System.out.println("Mã captcha đã hết hiệu lực!");
+
+      } catch (MessagingException e) {
+         throw new RuntimeException(e);
+      } catch (InterruptedException e) {
+         throw new RuntimeException(e);
+      }
+   }
+}
